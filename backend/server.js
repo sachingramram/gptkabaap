@@ -2,18 +2,27 @@ const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 
 dotenv.config();
 const app = express();
 
-// ✅ CORS with custom config
+// ✅ Serve static files from the frontend folder
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// ✅ CORS with custom config (update origin for production)
 app.use(cors({
-    origin: 'http://127.0.0.1:5500',
+    origin: process.env.NODE_ENV === 'production' ? 'your-render-url' : 'http://127.0.0.1:5500',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
+
+// ✅ Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 app.post('/chat', async (req, res) => {
     const userMessage = req.body.message;
